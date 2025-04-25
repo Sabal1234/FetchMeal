@@ -1,46 +1,45 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+
 export const FetchMeal = () => {
   const [mealName, setMealName] = useState('');
-  const [search, setSearch] = useState('');
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['meal', search],
-    queryFn: () =>
-      fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${search}`)
-        .then((res) => res.json()),
-    enabled: !!search,
+  const { data, isLoading } = useQuery({
+    queryKey: ['meal', mealName],
+    queryFn: async () => {
+      const res = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${mealName}`);
+      return res.json();
+    },
+
   });
 
-  const handleSearch = () => {
-    setSearch(mealName);
-  };
-
-  if (isError) {
-    return <h1>Sorry, there is an error</h1>;
-  }
-
-  if (isLoading) {
-    return <h1 style={{color:"white"}}>Loading...</h1>;
-  }
 
   return (
     <div className="meal-container">
-      <h2>Search Meal</h2>
+      <h2 style={{textAlign:'center'}}>Search Meal</h2>
       <input
         type="text"
         value={mealName}
         onChange={(e) => setMealName(e.target.value)}
+        placeholder="Type to search"
       />
-      <button onClick={handleSearch}>Search</button>
+
+      {isLoading && <h1 style={{ color: 'white' }}>Loading...</h1>}
+      <div className='meal-list'>
 
       {data?.meals?.map((meal) => (
         <div key={meal.idMeal} className="meal-card">
-          <h3>{meal.strMeal}</h3>
-          <img src={meal.strMealThumb} alt={meal.strMeal} />
-          <p>{meal.strInstructions}</p>
+          <h3 style={{textAlign:'center'}}>{meal.strMeal}</h3>
+          <img  src={meal.strMealThumb} alt={meal.strMeal} className='Images'  />
+          <h4 style={{textAlign:'center'}}>Categoty:{meal.strCategory}</h4>
+          {(meal.strTags != null) && <h4 style={{ textAlign: 'center' }}>{meal.strTags}</h4>}
+       
+         
         </div>
-      ))}
-    </div>
+
+        
+      ))} 
+      </div>
+      </div>
   );
 };
